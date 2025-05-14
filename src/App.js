@@ -10,29 +10,19 @@ function App() {
   const [classification, setClassification] = useState(null);
   const [openaiKey, setOpenaiKey] = useState(localStorage.getItem('openai_key') || '');
 
-  // handleLogin function will be called after a successful Google OAuth login
-  const handleLogin = async (token) => {
-    if (!token) {
-      console.error("No token provided for login");
-      return;
+const handleLogin = async (accessToken) => {
+  try {
+    const emailsFetched = await fetchEmails(accessToken);
+    if (!emailsFetched.length) {
+      console.warn("No emails found");
     }
+    setEmails(emailsFetched);
+    localStorage.setItem("emails", JSON.stringify(emailsFetched));
+  } catch (err) {
+    console.error("Error fetching emails:", err);
+  }
+};
 
-    try {
-      // Fetch the emails after successful login using the provided token
-      const emailsFetched = await fetchEmails(token);
-
-      if (emailsFetched.length > 0) {
-        setEmails(emailsFetched);
-        localStorage.setItem("emails", JSON.stringify(emailsFetched));
-      } else {
-        console.log("No emails found or error fetching emails.");
-      }
-    } catch (error) {
-      console.error("Error during email fetch:", error);
-    }
-  };
-
-  // Handle classification of emails using OpenAI API
   const handleClassify = async () => {
     if (!openaiKey) return alert("OpenAI key missing");
     localStorage.setItem('openai_key', openaiKey);

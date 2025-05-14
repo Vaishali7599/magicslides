@@ -1,5 +1,3 @@
-// src/utils/gmailAPI.js
-
 export const fetchEmails = async (accessToken, maxResults = 15) => {
   const headers = { Authorization: `Bearer ${accessToken}` };
 
@@ -8,16 +6,13 @@ export const fetchEmails = async (accessToken, maxResults = 15) => {
       `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${maxResults}`,
       { headers }
     );
-
     const data = await res.json();
 
-    // Check if 'messages' exists and is an array
-    if (!data.messages || !Array.isArray(data.messages)) {
-      console.error("No messages found or error fetching messages:", data);
-      return []; // Return an empty array if no messages are found
+    if (!data.messages) {
+      console.error("No messages found or error:", data);
+      return [];
     }
 
-    // Fetch details for each message
     const messages = await Promise.all(
       data.messages.map(async (msg) => {
         const msgRes = await fetch(
@@ -28,10 +23,9 @@ export const fetchEmails = async (accessToken, maxResults = 15) => {
       })
     );
 
-    return messages; // Return the list of fetched emails
-
+    return messages;
   } catch (error) {
-    console.error("Error during email fetch:", error);
-    return []; // Return an empty array in case of error
+    console.error("Error fetching emails:", error);
+    return [];
   }
 };
